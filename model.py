@@ -1,5 +1,3 @@
-import numpy as np
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -23,7 +21,7 @@ class View(nn.Module):
 class Actor(nn.Module):
     """Actor (Policy) Model."""
 
-    def __init__(self, state_size, action_size, seed, n_filt=(8, 16, 32), kernel_size=(9, 5, 3), stride=(2, 2, 1), fc_units=(64, 32)):
+    def __init__(self, state_size, action_size, seed, n_filt=(8, 16, 32), kernel_size=(9, 5, 3), stride=(2, 2, 1), fc_units=(128, 64, 32)):
         """Initialize parameters and build model.
         Params
         ======
@@ -50,17 +48,20 @@ class Actor(nn.Module):
         nf_old = 1
         for nf, ks, strd in zip(n_filt, kernel_size, stride):
             self.layers.append(nn.Conv1d(nf_old, nf, kernel_size=ks, stride=strd))
+            self.layers.append(nn.BatchNorm1d(nf))
             out_size = conv_out_size(out_size, ks, strd)
             nf_old = nf
         self.flat_size = n_filt[-1]*out_size  # 96
 
-        # view layer for flattening
+        # View layer for flattening
         self.layers.append(View((-1, self.flat_size)))
 
         # Feed-Forward layers
         self.layers.append(nn.Linear(self.flat_size, fc_units[0]))  # first fc layer
+        self.layers.append(nn.BatchNorm1d(fc_units[0]))
         for i in range(1, len(fc_units)):
             self.layers.append(nn.Linear(fc_units[i-1], fc_units[i]))  # middle fc layers
+            self.layers.append(nn.BatchNorm1d(fc_units[i]))
         self.layers.append(nn.Linear(fc_units[-1], action_size))  # last fc layer
 
     def forward(self, state):
