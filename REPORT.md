@@ -92,7 +92,7 @@ are staying around `38` with some deviations.
 The average scores are also summarized in the following table
 
 
-![Agent scores table](images/average-scores.png){:height="50%" width="50%"}
+![Agent scores table](images/average-scores.png)
 
 ## Future improvements
 Our agent gives concrete results but is far from achieving state of the art performance.
